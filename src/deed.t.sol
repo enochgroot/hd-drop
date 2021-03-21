@@ -514,6 +514,26 @@ contract DSDeedTest is DSTest {
         assertEq(deed.tokenURI(1), "t2");
     }
 
+    function testWork() public {
+        deed.mint(_addr, _uri);
+        assertEq(address(deed), 0xE58d97b6622134C0436d60daeE7FBB8b965D9713);
+
+        // for(uint256 i = 0; i < 1000; i++) {
+        //     if (deed.work(0, i)) {
+        //         assertEq(0, i);
+        //     }
+        // }
+        assertTrue(deed.work(0, 668));
+    }
+
+
+    function testFailWork() public {
+        deed.mint(_addr, _uri);
+        assertEq(address(deed), 0xE58d97b6622134C0436d60daeE7FBB8b965D9713);
+
+        assertTrue(deed.work(0, 0));
+    }
+
     // ERC721 Enumerable
 
     /// notice Count NFTs tracked by this contract

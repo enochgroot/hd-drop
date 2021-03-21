@@ -23,6 +23,8 @@ import "erc721/erc721.sol";
 
 contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
 
+    uint8                            public   difficulty = 8;
+
     bool                             public   stopped;
     mapping (address => uint)        public   wards;
 
@@ -47,10 +49,19 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
         address approved;
     }
 
+    // events
     event Stop();
     event Start();
     event Rely(address indexed guy);
     event Deny(address indexed guy);
+
+    // safe math
+    function sub(uint x, uint y) internal pure returns (uint z) {
+        require((z = x - y) <= x);
+    }
+    function mul(uint x, uint y) internal pure returns (uint z) {
+        require(y == 0 || (z = x * y) / y == x);
+    }
 
     constructor(string memory name, string memory symbol) public {
         _name = name;
@@ -59,6 +70,7 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
         _addInterface(0x5b5e139f); // ERC721Metadata
         _addInterface(0x780e9d63); // ERC721Enumerable
         wards[msg.sender] = 1;
+        emit Rely(msg.sender);
     }
 
     modifier nod(uint256 nft) {
@@ -188,6 +200,7 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
     function _mint(address guy, string memory uri) internal returns (uint256 nft) {
         require(guy != address(0), "ds-deed-invalid-address");
         nft = _ids++;
+        // require(work(nft, nonce), "ds-deed-failed-work");
         _allDeeds.push(nft);
         _deeds[nft] = Deed(
             _allDeeds[_allDeeds.length - 1],
@@ -197,6 +210,7 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
         );
         _upush(guy, nft);
         _uris[nft] = uri;
+        // _nonce[nft] = nonce;
         emit Transfer(address(0), guy, nft);
     }
 
@@ -257,6 +271,22 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
 
     function isApprovedForAll(address guy, address op) external override view returns (bool) {
         return _operators[guy][op];
+    }
+
+    function _lshift(bytes32 bits, uint256 shift) internal view returns (bytes32) {
+        return bytes32(mul(uint256(bits), 2 ** shift));
+    }
+
+    function _firstn(bytes32 bits, uint256 num) internal view returns (bytes32) {
+        bytes32 ones = bytes32(sub(2 ** num, 1));
+        bytes32 mask = _lshift(ones, sub(256, num));
+        return bits & mask;
+    } 
+
+    function work(uint256 id, uint256 nonce) public view returns (bool) {
+        bytes32 candidate = _firstn(keccak256(abi.encodePacked(address(this), id, nonce)), difficulty);
+        bytes32 target = _firstn(bytes32(uint256(address(this)) << 96), difficulty);
+        return (candidate == target);
     }
 
     function stop() external auth {

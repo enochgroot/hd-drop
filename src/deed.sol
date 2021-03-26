@@ -21,9 +21,14 @@ pragma solidity >=0.6.0;
 
 import "erc721/erc721.sol";
 
-contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
+interface IERC2981Royalties is ERC165 {
+    function royaltyInfo(uint256 nft) external returns (address gal, uint256 fee);
+    function receivedRoyalties(address gal, address buyer, uint256 nft, address gem, uint256 fee) external;
+}
 
-    uint8                            public   difficulty = 8;
+contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
+
+    uint8                            public   difficulty = 10;
 
     bool                             public   stopped;
     mapping (address => uint)        public   wards;
@@ -43,10 +48,13 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
     mapping (address => mapping (address => bool)) internal _operators;
 
     struct Deed {
-        uint256      pos;
-        uint256     upos;
-        address      guy;
-        address approved;
+        uint256      pos;     // position in _allDeeds
+        uint256     upos;     // position in _usrDeeds
+        address      guy;     // creator
+        address approved;     // appoved usr
+        uint256    nonce;     // nonce to prove work
+        address      gal;     // fee recipient
+        uint256      fee;     // fee 0 or [100_000, 10_000_000]
     }
 
     // events
@@ -54,6 +62,13 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
     event Start();
     event Rely(address indexed guy);
     event Deny(address indexed guy);
+    event ReceivedRoyalties(
+        address indexed _royaltyRecipient,
+        address indexed _buyer,
+        uint256 indexed _tokenId,
+        address _tokenPaid,
+        uint256 _amount
+    );
 
     // safe math
     function sub(uint x, uint y) internal pure returns (uint z) {
@@ -63,12 +78,14 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
         require(y == 0 || (z = x * y) / y == x);
     }
 
-    constructor(string memory name, string memory symbol) public {
+    constructor(string memory name, string memory symbol, uint8 _difficulty) public {
         _name = name;
         _symbol = symbol;
+        difficulty = _difficulty;
         _addInterface(0x80ac58cd); // ERC721
         _addInterface(0x5b5e139f); // ERC721Metadata
         _addInterface(0x780e9d63); // ERC721Enumerable
+        _addInterface(0x4b7f2c2d); // IERC2981Royalties
         wards[msg.sender] = 1;
         emit Rely(msg.sender);
     }
@@ -185,32 +202,31 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
         emit Transfer(src, dst, nft);
     }
 
-    function mint(string memory uri) public returns (uint256) {
-        return mint(msg.sender, uri);
+    function mint(address guy, string memory uri, uint256 nonce, address gal, uint256 fee) public auth stoppable returns (uint256 nft) {
+        return _mint(guy, uri, nonce, address(gal), fee);
     }
 
-    function mint(address guy) public returns (uint256) {
-        return mint(guy, "");
-    }
-
-    function mint(address guy, string memory uri) public auth stoppable returns (uint256 nft) {
-        return _mint(guy, uri);
-    }
-
-    function _mint(address guy, string memory uri) internal returns (uint256 nft) {
+    function _mint(address guy, string memory uri, uint256 nonce, address gal, uint256 fee) internal returns (uint256 nft) {
         require(guy != address(0), "ds-deed-invalid-address");
+        require(fee/100000 <= 100, "ds-deed-invalid-fee");
+
         nft = _ids++;
-        // require(work(nft, nonce), "ds-deed-failed-work");
+        require(work(nft, nonce), "ds-deed-failed-work");
+        difficulty++;
+
         _allDeeds.push(nft);
         _deeds[nft] = Deed(
             _allDeeds[_allDeeds.length - 1],
             _usrDeeds[guy].length - 1,
             guy,
-            address(0)
+            address(0),
+            nonce,
+            (gal != address(0)) ? gal : guy,
+            fee
         );
         _upush(guy, nft);
         _uris[nft] = uri;
-        // _nonce[nft] = nonce;
+
         emit Transfer(address(0), guy, nft);
     }
 
@@ -311,5 +327,13 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata {
 
     function setTokenUri(uint256 nft, string memory uri) public auth stoppable {
         _uris[nft] = uri;
+    }
+
+    function royaltyInfo(uint256 nft) public override returns (address receiver, uint256 amount) {
+        return (_deeds[nft].gal, _deeds[nft].fee);
+    }
+
+    function receivedRoyalties(address gal, address buyer, uint256 nft, address gem, uint256 fee) public override {
+        emit ReceivedRoyalties(gal, buyer, nft, gem, fee);
     }
 }

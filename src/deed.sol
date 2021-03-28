@@ -61,13 +61,6 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
     event Start();
     event Rely(address indexed guy);
     event Deny(address indexed guy);
-    event ReceivedRoyalties(
-        address indexed _royaltyRecipient,
-        address indexed _buyer,
-        uint256 indexed _tokenId,
-        address _tokenPaid,
-        uint256 _amount
-    );
 
     // safe math
     function sub(uint x, uint y) internal pure returns (uint z) {
@@ -217,6 +210,8 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
         require(work(nft, nonce, hard), "ds-deed-failed-work");
         hard = hard + 1;
 
+        gal = (gal != address(0)) ? gal : guy;
+
         _allDeeds.push(nft);
         _deeds[nft] = Deed(
             _allDeeds[_allDeeds.length - 1],
@@ -224,11 +219,19 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
             guy,
             address(0),
             nonce,
-            (gal != address(0)) ? gal : guy,
+            gal,
             fee
         );
         _upush(guy, nft);
         _uris[nft] = uri;
+
+        if (fee > 0) {
+            address[] memory recipients = new address[](1);
+            uint[] memory bps = new uint[](1);
+            recipients[0] = gal;
+            bps[0] = fee / 1_000;
+            emit SecondarySaleFees(nft, recipients, bps);
+        }
 
         emit Transfer(address(0), guy, nft);
     }
@@ -349,8 +352,7 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
 
     function getFeeBps(uint256 nft) external view override returns (uint[] memory) {
         uint[] memory result = new uint[](1);
-        // TODO: normalize fee for rarible
-        result[0] = _deeds[nft].fee;
+        result[0] = _deeds[nft].fee / 1_000;
         return result;
     }
 

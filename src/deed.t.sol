@@ -607,11 +607,30 @@ contract DSDeedTest is DSTest {
         assertTrue(deed.work(nft, NONCE9, deed.hard() - 1));
     }
 
+    function testFailWork() public {
+        assertEq(address(deed), 0xE58d97b6622134C0436d60daeE7FBB8b965D9713);
+        assertEq(uint(deed.hard()), 0);
+        deed.mint(_addr, _uri, 0, _addr, 0);
+        assertEq(uint(deed.hard()), 1);
+
+        assertTrue(deed.work(1, 0, 1));
+    }
+
     function testIERC2981Royalties10() public {
         uint256 nft = deed.mint(_addr, _uri, NONCE, address(alice), 1_000_000); // 10% fee
         (address gal, uint256 fee) = deed.royaltyInfo(nft);
         assertEq(gal, address(alice));
         assertEq(fee, 1_000_000);
+    }
+
+    function testIRaribleRoyaltiesV1_10() public {
+        uint256 nft = deed.mint(_addr, _uri, NONCE, address(alice), 1_000_000); // 10% fee
+        address payable[] memory gals = new address payable[](1);
+        gals = deed.getFeeRecipients(nft);
+        uint[] memory fees = new uint[](1);
+        fees = deed.getFeeBps(nft);
+        assertEq(gals[0], payable(address(alice)));
+        assertEq(fees[0], 1_000);
     }
 
     function testIERC2981Royalties100() public {
@@ -621,11 +640,31 @@ contract DSDeedTest is DSTest {
         assertEq(fee, 10_000_000);
     }
 
+    function testIRaribleRoyaltiesV1_100() public {
+        uint256 nft = deed.mint(_addr, _uri, NONCE, address(alice), 10_000_000); // 100% fee
+        address payable[] memory gals = new address payable[](1);
+        gals = deed.getFeeRecipients(nft);
+        uint[] memory fees = new uint[](1);
+        fees = deed.getFeeBps(nft);
+        assertEq(gals[0], payable(address(alice)));
+        assertEq(fees[0], 10_000);
+    }
+
     function testERC2981Royalties01() public {
         uint256 nft = deed.mint(_addr, _uri, NONCE, address(alice), 10_000); // 0.1% fee
         (address gal, uint256 fee) = deed.royaltyInfo(nft);
         assertEq(gal, address(alice));
         assertEq(fee, 10_000);
+    }
+
+    function testIRaribleRoyaltiesV1_01() public {
+        uint256 nft = deed.mint(_addr, _uri, NONCE, address(alice), 10_000); // 0.1% fee
+        address payable[] memory gals = new address payable[](1);
+        gals = deed.getFeeRecipients(nft);
+        uint[] memory fees = new uint[](1);
+        fees = deed.getFeeBps(nft);
+        assertEq(gals[0], payable(address(alice)));
+        assertEq(fees[0], 10);
     }
 
     function testERC2981Royalties00001() public {
@@ -646,13 +685,8 @@ contract DSDeedTest is DSTest {
         deed.mint(_addr, _uri, NONCE, address(alice), 10_000_001); // >100% fee
     }
 
-    function testFailWork() public {
-        assertEq(address(deed), 0xE58d97b6622134C0436d60daeE7FBB8b965D9713);
-        assertEq(uint(deed.hard()), 0);
-        deed.mint(_addr, _uri, 0, _addr, 0);
-        assertEq(uint(deed.hard()), 1);
-
-        assertTrue(deed.work(1, 0, 1));
+    function testContractURI() public {
+        assertEq(deed.contractURI(), _contractURI);
     }
 
     // ERC721 Enumerable
@@ -820,10 +854,6 @@ contract DSDeedTest is DSTest {
         deed.mint(address(alice), "", NONCE, address(alice), 0);
 
         alice.doPush(address(deed), 0);
-    }
-
-    function testContractURI() public {
-        assertEq(deed.contractURI(), _contractURI);
     }
 
 }

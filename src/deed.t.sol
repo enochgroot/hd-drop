@@ -74,7 +74,16 @@ contract DSDeedTest is DSTest {
     address _addr2 = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     string  _uri   = "https://etherscan.io/address/0x00000000219ab540356cBB839Cbe05303d7705Fa";
 
-    uint256 public constant NONCE = 1831;
+    uint256 public constant NONCE  = 0;
+    uint256 public constant NONCE1 = 5;
+    uint256 public constant NONCE2 = 11;
+    uint256 public constant NONCE3 = 6;
+    uint256 public constant NONCE4 = 10;
+    uint256 public constant NONCE5 = 24;
+    uint256 public constant NONCE6 = 48;
+    uint256 public constant NONCE7 = 38;
+    uint256 public constant NONCE8 = 392;
+    uint256 public constant NONCE9 = 646;
 
     DeedUser alice;
     DeedUser bob;
@@ -82,7 +91,7 @@ contract DSDeedTest is DSTest {
     BadTokenReceiver badreceiver;
 
     function setUp() public {
-        deed  = new DSDeed(_name, _symb, 10);
+        deed  = new DSDeed(_name, _symb, 0);
         alice = new DeedUser(deed);
         bob   = new DeedUser(deed);
 
@@ -102,14 +111,14 @@ contract DSDeedTest is DSTest {
         assertEq(deed.totalSupply(), 0);
 
         deed.mint(_addr, _uri, NONCE, _addr, 0);
-        deed.mint(_addr, "t1", NONCE, _addr, 0);
-        deed.mint(_addr, "t2", NONCE, _addr, 0);
-        deed.mint(_addr, "t3", NONCE, _addr, 0);
-        deed.mint(_addr, "t4", NONCE, _addr, 0);
-        deed.mint(_addr, "t5", NONCE, _addr, 0);
-        deed.mint(_addr, "t6", NONCE, _addr, 0);
-        deed.mint(_addr, "t7", NONCE, _addr, 0);
-        deed.mint(_addr, "t8", NONCE, _addr, 0);
+        deed.mint(_addr, "t1", NONCE1, _addr, 0);
+        deed.mint(_addr, "t2", NONCE2, _addr, 0);
+        deed.mint(_addr, "t3", NONCE3, _addr, 0);
+        deed.mint(_addr, "t4", NONCE4, _addr, 0);
+        deed.mint(_addr, "t5", NONCE5, _addr, 0);
+        deed.mint(_addr, "t6", NONCE6, _addr, 0);
+        deed.mint(_addr, "t7", NONCE7, _addr, 0);
+        deed.mint(_addr, "t8", NONCE8, _addr, 0);
 
         assertEq(deed.totalSupply(), 9);
         assertEq(deed.tokenURI(8), "t8");
@@ -126,14 +135,14 @@ contract DSDeedTest is DSTest {
 
     function testBurnMany() public {
         deed.mint(_addr, _uri, NONCE, _addr, 0);
-        deed.mint(_addr, "t1", NONCE, _addr, 0);
-        deed.mint(_addr, "t2", NONCE, _addr, 0);
-        deed.mint(_addr, "t3", NONCE, _addr, 0);
-        deed.mint(_addr, "t4", NONCE, _addr, 0);
-        deed.mint(_addr, "t5", NONCE, _addr, 0);
-        deed.mint(_addr, "t6", NONCE, _addr, 0);
-        deed.mint(_addr, "t7", NONCE, _addr, 0);
-        deed.mint(_addr, "t8", NONCE, _addr, 0);
+        deed.mint(_addr, "t1", NONCE1, _addr, 0);
+        deed.mint(_addr, "t2", NONCE2, _addr, 0);
+        deed.mint(_addr, "t3", NONCE3, _addr, 0);
+        deed.mint(_addr, "t4", NONCE4, _addr, 0);
+        deed.mint(_addr, "t5", NONCE5, _addr, 0);
+        deed.mint(_addr, "t6", NONCE6, _addr, 0);
+        deed.mint(_addr, "t7", NONCE7, _addr, 0);
+        deed.mint(_addr, "t8", NONCE8, _addr, 0);
         assertEq(deed.totalSupply(), 9);  // setup
 
         deed.burn(7);
@@ -179,12 +188,12 @@ contract DSDeedTest is DSTest {
         assertEq(deed.balanceOf(_addr2),  0);
 
         deed.mint(_addr, _uri, NONCE, _addr,  0);
-        deed.mint(_addr,  "t1", NONCE, _addr, 0);
-        deed.mint(_addr,  "t2", NONCE, _addr, 0);
-        deed.mint(_addr2, "t3", NONCE, _addr, 0);
-        deed.mint(_addr2, "t4", NONCE, _addr, 0);
-        deed.mint(_addr2, "t5", NONCE, _addr, 0);
-        deed.mint(_addr,  "t6", NONCE, _addr, 0);
+        deed.mint(_addr,  "t1", NONCE1, _addr, 0);
+        deed.mint(_addr,  "t2", NONCE2, _addr, 0);
+        deed.mint(_addr2, "t3", NONCE3, _addr, 0);
+        deed.mint(_addr2, "t4", NONCE4, _addr, 0);
+        deed.mint(_addr2, "t5", NONCE5, _addr, 0);
+        deed.mint(_addr,  "t6", NONCE6, _addr, 0);
 
         assertEq(deed.balanceOf(_addr),  4);
         assertEq(deed.balanceOf(_addr2), 3);
@@ -206,8 +215,8 @@ contract DSDeedTest is DSTest {
     /// param _tokenId The identifier for an NFT
     /// return The address of the owner of the NFT
     function testOwnerOf() public {
-        deed.mint(address(this), _uri, NONCE, address(this), 0);
-        deed.mint(address(101),  "t1", NONCE, address(this), 0);
+        deed.mint(address(this), _uri, NONCE,  address(this), 0);
+        deed.mint(address(101),  "t1", NONCE1, address(this), 0);
 
         assertEq(deed.ownerOf(0), address(this));
         assertEq(deed.ownerOf(1), address(101));
@@ -376,14 +385,7 @@ contract DSDeedTest is DSTest {
 
         assertEq(deed.getApproved(0), address(this));
         
-        // 0 = NONCE
-        // 1 = 97317
-        // for(uint256 i = 0; i < 100000; i++) {
-        //     if (deed.work(1, i)) {
-        //         assertEq(1, i);
-        //     }
-        // }
-        deed.mint(address(alice), "", 97317, address(alice), 0);
+        deed.mint(address(alice), "", NONCE1, address(alice), 0);
         alice.doSetApprovalForAll(address(bob), true);
 
         bob.doApprove(address(1), 1);
@@ -408,15 +410,15 @@ contract DSDeedTest is DSTest {
     //function setApprovalForAll(address _operator, bool _approved) external;
     function testSetApprovalForAll() public {
         deed.mint(address(alice), _uri, NONCE, address(alice), 0);
-        deed.mint(address(alice), "t1", NONCE, address(alice), 0);
-        deed.mint(address(alice), "t2", NONCE, address(alice), 0);
-        deed.mint(address(alice), "t3", NONCE, address(alice), 0);
-        deed.mint(address(alice), "t4", NONCE, address(alice), 0);
+        deed.mint(address(alice), "t1", NONCE1, address(alice), 0);
+        deed.mint(address(alice), "t2", NONCE2, address(alice), 0);
+        deed.mint(address(alice), "t3", NONCE3, address(alice), 0);
+        deed.mint(address(alice), "t4", NONCE4, address(alice), 0);
 
         alice.doSetApprovalForAll(address(bob), true);
 
-        deed.mint(address(alice), "t5", NONCE, address(alice), 0);
-        deed.mint(address(alice), "t6", NONCE, address(alice), 0);
+        deed.mint(address(alice), "t5", NONCE5, address(alice), 0);
+        deed.mint(address(alice), "t6", NONCE6, address(alice), 0);
 
         assertTrue(deed.isApprovedForAll(address(alice), address(bob)));
 
@@ -517,30 +519,129 @@ contract DSDeedTest is DSTest {
     ///  Metadata JSON Schema".
     function testTokenURI() public {
         deed.mint(_addr, _uri, NONCE, _addr, 0);  //setup
-        deed.mint(_addr, "t2", NONCE, _addr, 0);
+        deed.mint(_addr, "t2", NONCE1, _addr, 0);
 
         assertEq(deed.tokenURI(0), _uri);
         assertEq(deed.tokenURI(1), "t2");
     }
 
     function testWork() public {
-        deed.mint(_addr, _uri, NONCE, _addr, 0);
         assertEq(address(deed), 0xE58d97b6622134C0436d60daeE7FBB8b965D9713);
 
         // for(uint256 i = 0; i < 100000; i++) {
-        //     if (deed.work(0, i)) {
-        //         assertEq(0, i);
+        //     if (deed.work(9, i, 9)) {
+        //         assertEq(i, 9);
+        //         break;
         //     }
         // }
-        assertTrue(deed.work(0, 99591));
+
+        // test for hard = 0
+        uint256 nft = deed.mint(_addr, _uri, NONCE, _addr, 0);
+        assertEq(nft, 0);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE, deed.hard() - 1));
+
+        // test for hard = 1
+        nft = deed.mint(_addr, _uri, NONCE1, _addr, 0);
+        assertEq(nft, 1);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE1, deed.hard() - 1));
+
+        // test for hard = 2
+        nft = deed.mint(_addr, _uri, NONCE2, _addr, 0);
+        assertEq(nft, 2);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE2, deed.hard() - 1));
+
+        // test for hard = 3
+        nft = deed.mint(_addr, _uri, NONCE3, _addr, 0);
+        assertEq(nft, 3);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE3, deed.hard() - 1));
+
+        // test for hard = 4
+        nft = deed.mint(_addr, _uri, NONCE4, _addr, 0);
+        assertEq(nft, 4);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE4, deed.hard() - 1));
+
+        // test for hard = 5
+        nft = deed.mint(_addr, _uri, NONCE5, _addr, 0);
+        assertEq(nft, 5);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE5, deed.hard() - 1));
+
+        // test for hard = 6
+        nft = deed.mint(_addr, _uri, NONCE6, _addr, 0);
+        assertEq(nft, 6);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE6, deed.hard() - 1));
+
+        // test for hard = 7
+        nft = deed.mint(_addr, _uri, NONCE7, _addr, 0);
+        assertEq(nft, 7);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE7, deed.hard() - 1));
+
+        // test for hard = 8
+        nft = deed.mint(_addr, _uri, NONCE8, _addr, 0);
+        assertEq(nft, 8);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE8, deed.hard() - 1));
+
+        // test for hard = 9
+        nft = deed.mint(_addr, _uri, NONCE9, _addr, 0);
+        assertEq(nft, 9);
+        assertEq(nft, uint(deed.hard()) - 1);
+        assertTrue(deed.work(nft, NONCE9, deed.hard() - 1));
     }
 
+    function testIERC2981Royalties10() public {
+        uint256 nft = deed.mint(_addr, _uri, NONCE, address(alice), 1_000_000); // 10% fee
+        (address gal, uint256 fee) = deed.royaltyInfo(nft);
+        assertEq(gal, address(alice));
+        assertEq(fee, 1_000_000);
+    }
+
+    function testIERC2981Royalties100() public {
+        uint256 nft = deed.mint(_addr, _uri, NONCE, address(bob), 10_000_000); // 100% fee
+        (address gal, uint256 fee) = deed.royaltyInfo(nft);
+        assertEq(gal, address(bob));
+        assertEq(fee, 10_000_000);
+    }
+
+    function testERC2981Royalties01() public {
+        uint256 nft = deed.mint(_addr, _uri, NONCE, address(alice), 10_000); // 0.1% fee
+        (address gal, uint256 fee) = deed.royaltyInfo(nft);
+        assertEq(gal, address(alice));
+        assertEq(fee, 10_000);
+    }
+
+    function testERC2981Royalties00001() public {
+        uint256 nft = deed.mint(_addr, _uri, NONCE, address(alice), 1); // 0.00001% fee
+        (address gal, uint256 fee) = deed.royaltyInfo(nft);
+        assertEq(gal, address(alice));
+        assertEq(fee, 1);
+    }
+
+    function testIERC2981Royalties0() public {
+        uint256 nft = deed.mint(_addr, _uri, NONCE, _addr, 0); // 0% fee
+        (address gal, uint256 fee) = deed.royaltyInfo(nft);
+        assertEq(gal, _addr);
+        assertEq(fee, 0);
+    }
+
+    function testFailERC2981Royalties() public {
+        deed.mint(_addr, _uri, NONCE, address(alice), 10_000_001); // >100% fee
+    }
 
     function testFailWork() public {
-        deed.mint(_addr, _uri, NONCE, _addr, 0);
         assertEq(address(deed), 0xE58d97b6622134C0436d60daeE7FBB8b965D9713);
+        assertEq(uint(deed.hard()), 0);
+        deed.mint(_addr, _uri, 0, _addr, 0);
+        assertEq(uint(deed.hard()), 1);
 
-        assertTrue(deed.work(0, 0));
+        assertTrue(deed.work(1, 0, 1));
     }
 
     // ERC721 Enumerable
@@ -550,11 +651,11 @@ contract DSDeedTest is DSTest {
     ///  them has an assigned and queryable owner not equal to the zero address
     function testTotalSupply() public {
         deed.mint(_addr, _uri, NONCE, _addr, 0);
-        deed.mint(_addr, "t2", NONCE, _addr, 0); //setup
+        deed.mint(_addr, "t2", NONCE1, _addr, 0); //setup
 
         assertEq(deed.totalSupply(), 2);
-        deed.mint(_addr,  "t3", NONCE, _addr, 0);
-        deed.mint(_addr2, "t4", NONCE, _addr, 0);
+        deed.mint(_addr,  "t3", NONCE2, _addr, 0);
+        deed.mint(_addr2, "t4", NONCE3, _addr, 0);
         assertEq(deed.totalSupply(), 4);
         deed.burn(0);
         assertEq(deed.totalSupply(), 3);
@@ -562,7 +663,7 @@ contract DSDeedTest is DSTest {
         assertEq(deed.totalSupply(), 2);
         deed.burn(2);
         assertEq(deed.totalSupply(), 1);
-        deed.mint(_addr, "t5", NONCE, _addr, 0);
+        deed.mint(_addr, "t5", NONCE4, _addr, 0);
         assertEq(deed.totalSupply(), 2);
         assertEq(deed.balanceOf(_addr), 1);
         assertEq(deed.balanceOf(_addr2), 1);
@@ -580,12 +681,12 @@ contract DSDeedTest is DSTest {
     ///  (sort order not specified)
     function testTokenByIndex() public {
         deed.mint(_addr,  _uri, NONCE, _addr,  0);
-        deed.mint(_addr,  "t1", NONCE, _addr,  0);
-        deed.mint(_addr,  "t2", NONCE, _addr,  0);
-        deed.mint(_addr2, "t3", NONCE, _addr2, 0);
-        deed.mint(_addr2, "t4", NONCE, _addr2, 0);
-        deed.mint(_addr2, "t5", NONCE, _addr2, 0);
-        deed.mint(_addr,  "t6", NONCE, _addr,  0);
+        deed.mint(_addr,  "t1", NONCE1, _addr,  0);
+        deed.mint(_addr,  "t2", NONCE2, _addr,  0);
+        deed.mint(_addr2, "t3", NONCE3, _addr2, 0);
+        deed.mint(_addr2, "t4", NONCE4, _addr2, 0);
+        deed.mint(_addr2, "t5", NONCE5, _addr2, 0);
+        deed.mint(_addr,  "t6", NONCE6, _addr,  0);
 
         assertEq(deed.tokenByIndex(4), 4);
         deed.burn(4);
@@ -609,12 +710,12 @@ contract DSDeedTest is DSTest {
     ///   (sort order not specified)
     function testTokenOfOwnerByIndex() public {
         deed.mint(_addr,   _uri, NONCE, _addr, 0);
-        deed.mint(_addr,   "t1", NONCE, _addr, 0);
-        deed.mint(_addr,   "t2", NONCE, _addr, 0);
-        deed.mint(_addr2,  "t3", NONCE, _addr2, 0);
-        deed.mint(_addr2,  "t4", NONCE, _addr2, 0);
-        deed.mint(_addr2,  "t5", NONCE, _addr2, 0);
-        deed.mint(_addr,   "t6", NONCE, _addr, 0);
+        deed.mint(_addr,   "t1", NONCE1, _addr, 0);
+        deed.mint(_addr,   "t2", NONCE2, _addr, 0);
+        deed.mint(_addr2,  "t3", NONCE3, _addr2, 0);
+        deed.mint(_addr2,  "t4", NONCE4, _addr2, 0);
+        deed.mint(_addr2,  "t5", NONCE5, _addr2, 0);
+        deed.mint(_addr,   "t6", NONCE6, _addr, 0);
 
         assertEq(deed.tokenOfOwnerByIndex(_addr, 0), 0);
         assertEq(deed.tokenOfOwnerByIndex(_addr, 2), 2);

@@ -28,7 +28,7 @@ interface IERC2981Royalties is ERC165 {
 
 contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
 
-    uint8                            public   difficulty = 10;
+    uint8                            public   hard;
 
     bool                             public   stopped;
     mapping (address => uint)        public   wards;
@@ -78,10 +78,10 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
         require(y == 0 || (z = x * y) / y == x);
     }
 
-    constructor(string memory name, string memory symbol, uint8 _difficulty) public {
+    constructor(string memory name, string memory symbol, uint8 _hard) public {
         _name = name;
         _symbol = symbol;
-        difficulty = _difficulty;
+        hard = _hard;
         _addInterface(0x80ac58cd); // ERC721
         _addInterface(0x5b5e139f); // ERC721Metadata
         _addInterface(0x780e9d63); // ERC721Enumerable
@@ -208,11 +208,11 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
 
     function _mint(address guy, string memory uri, uint256 nonce, address gal, uint256 fee) internal returns (uint256 nft) {
         require(guy != address(0), "ds-deed-invalid-address");
-        require(fee/100000 <= 100, "ds-deed-invalid-fee");
+        require(fee <= 10_000_000, "ds-deed-invalid-fee");
 
         nft = _ids++;
-        require(work(nft, nonce), "ds-deed-failed-work");
-        difficulty++;
+        require(work(nft, nonce, hard), "ds-deed-failed-work");
+        hard = hard + 1;
 
         _allDeeds.push(nft);
         _deeds[nft] = Deed(
@@ -289,17 +289,18 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
         return _operators[guy][op];
     }
 
-    function _lshift(bytes32 bits, uint256 shift) internal view returns (bytes32) {
+    function _lshift(bytes32 bits, uint256 shift) internal pure returns (bytes32) {
         return bytes32(mul(uint256(bits), 2 ** shift));
     }
 
-    function _firstn(bytes32 bits, uint256 num) internal view returns (bytes32) {
+    function _firstn(bytes32 bits, uint256 num) internal pure returns (bytes32) {
         bytes32 ones = bytes32(sub(2 ** num, 1));
         bytes32 mask = _lshift(ones, sub(256, num));
         return bits & mask;
     } 
 
-    function work(uint256 id, uint256 nonce) public view returns (bool) {
+    // validate a proof-of-work for a given NFT, with a nonce, at a difficulty level
+    function work(uint256 id, uint256 nonce, uint8 difficulty) public view returns (bool) {
         bytes32 candidate = _firstn(keccak256(abi.encodePacked(address(this), id, nonce)), difficulty);
         bytes32 target = _firstn(bytes32(uint256(address(this)) << 96), difficulty);
         return (candidate == target);

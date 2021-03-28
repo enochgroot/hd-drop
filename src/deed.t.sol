@@ -68,11 +68,12 @@ contract BadTokenReceiver { uint256 one = 0; }
 contract DSDeedTest is DSTest {
     DSDeed deed;
 
-    string  _name  = "TestToken";
-    string  _symb  = "TEST";
-    address _addr  = 0x00000000219ab540356cBB839Cbe05303d7705Fa;
-    address _addr2 = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    string  _uri   = "https://etherscan.io/address/0x00000000219ab540356cBB839Cbe05303d7705Fa";
+    string  _name        = "TestToken";
+    string  _symb        = "TEST";
+    address _addr        = 0x00000000219ab540356cBB839Cbe05303d7705Fa;
+    address _addr2       = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    string  _uri         = "https://etherscan.io/address/0x00000000219ab540356cBB839Cbe05303d7705Fa";
+    string  _contractURI = "https://metadata-url.com/my-metadata";
 
     uint256 public constant NONCE  = 0;
     uint256 public constant NONCE1 = 5;
@@ -91,7 +92,7 @@ contract DSDeedTest is DSTest {
     BadTokenReceiver badreceiver;
 
     function setUp() public {
-        deed  = new DSDeed(_name, _symb, 0);
+        deed  = new DSDeed(_name, _symb, 0, _contractURI);
         alice = new DeedUser(deed);
         bob   = new DeedUser(deed);
 
@@ -105,6 +106,16 @@ contract DSDeedTest is DSTest {
         deed.mint(_addr, _uri, NONCE, _addr, 0);
 
         assertEq(deed.totalSupply(), 1);
+    }
+
+    function testERC165() public {
+        // 
+        //  bytes4(keccak256('getFeeBps(uint256)')) == 0x0ebd4c7f
+        //  bytes4(keccak256('getFeeRecipients(uint256)')) == 0xb9c4d9fb
+        // 
+        //  => 0x0ebd4c7f ^ 0xb9c4d9fb == 0xb7799584
+        // 
+        // assertEq(deed.contractURI.selector, 0);
     }
 
     function testMintMany() public {
@@ -768,39 +779,51 @@ contract DSDeedTest is DSTest {
         deed.stop();
         alice.doPush(address(bob), 0);
     }
+
     function testFailPullWhenStopped() public {
         deed.mint(address(alice), "", NONCE, address(alice), 0);
         alice.doApprove(address(bob), 0);
         deed.stop();
         bob.doPull(address(alice), 0);
     }
+
     function testFailMoveWhenStopped() public {
         deed.mint(address(alice), "", NONCE, address(alice), 0);
         alice.doApprove(address(bob), 0);
         deed.stop();
         alice.doMove(address(alice), address(bob), 0);
     }
+
     function testFailMintWhenStopped() public {
         deed.stop();
         deed.mint(address(alice), "", NONCE, address(alice), 0);
     }
+
     function testFailMintGuyWhenStopped() public {
         deed.stop();
         deed.mint(address(this), "t1", NONCE, address(this), 0);
     }
+
     function testFailBurnWhenStopped() public {
         deed.mint(address(alice), "", NONCE, address(alice), 0);
         deed.stop();
         deed.burn(0);
     }
+
     function testFailTrustWhenStopped() public {
         deed.mint(address(alice), "", NONCE, address(alice), 0);
         deed.stop();
         alice.doApprove(address(bob), 0);
     }
+
     function testFailSendSelf() public {
         deed.mint(address(alice), "", NONCE, address(alice), 0);
 
         alice.doPush(address(deed), 0);
     }
+
+    function testContractURI() public {
+        assertEq(deed.contractURI(), _contractURI);
+    }
+
 }

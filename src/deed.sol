@@ -20,13 +20,11 @@
 pragma solidity >=0.6.0;
 
 import "erc721/erc721.sol";
+import "./IERC2981Royalties.sol";
+import "./IOpenSeaContractLevelMetadata.sol";
+import "./IRaribleRoyaltiesV1.sol";
 
-interface IERC2981Royalties is ERC165 {
-    function royaltyInfo(uint256 nft) external returns (address gal, uint256 fee);
-    function receivedRoyalties(address gal, address buyer, uint256 nft, address gem, uint256 fee) external;
-}
-
-contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
+contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, IOpenSeaContractLevelMetadata, IRaribleRoyaltiesV1 {
 
     uint8                            public   hard;
 
@@ -37,6 +35,7 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
 
     string                           internal _name;
     string                           internal _symbol;
+    string                           internal _uri;
 
     mapping (uint256 => string)      internal _uris;
 
@@ -78,14 +77,18 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
         require(y == 0 || (z = x * y) / y == x);
     }
 
-    constructor(string memory name, string memory symbol, uint8 _hard) public {
+    constructor(string memory name, string memory symbol, uint8 _hard, string memory uri) public {
         _name = name;
         _symbol = symbol;
         hard = _hard;
+        _uri = uri;
         _addInterface(0x80ac58cd); // ERC721
         _addInterface(0x5b5e139f); // ERC721Metadata
         _addInterface(0x780e9d63); // ERC721Enumerable
         _addInterface(0x4b7f2c2d); // IERC2981Royalties
+        _addInterface(0xe8a3d485); // IOpenSeaContractLevelMetadata
+        _addInterface(0xb7799584); // IRaribleRoyaltiesV1
+
         wards[msg.sender] = 1;
         emit Rely(msg.sender);
     }
@@ -336,5 +339,22 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties {
 
     function receivedRoyalties(address gal, address buyer, uint256 nft, address gem, uint256 fee) public override {
         emit ReceivedRoyalties(gal, buyer, nft, gem, fee);
+    }
+
+    function getFeeRecipients(uint256 nft) external view override returns (address payable[] memory) {
+        address payable[] memory result = new address payable[](1);
+        result[0] = payable(_deeds[nft].gal);
+        return result;
+    }
+
+    function getFeeBps(uint256 nft) external view override returns (uint[] memory) {
+        uint[] memory result = new uint[](1);
+        // TODO: normalize fee for rarible
+        result[0] = _deeds[nft].fee;
+        return result;
+    }
+
+    function contractURI() public view override returns (string memory) {
+        return _uri;
     }
 }

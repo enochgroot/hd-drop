@@ -2,7 +2,7 @@
 
 pragma solidity >=0.6.0;
 
-interface IERC2981Royalties {
+interface IEIP2981Royalties {
     event ReceivedRoyalties(
         address indexed _royaltyRecipient,
         address indexed _buyer,

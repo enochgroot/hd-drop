@@ -1,29 +1,36 @@
+# HashDrop
 
-# DSDeed
+_An ERC721 Token based on DSDeed_
 
-_An ERC721 Token with wholesome memes_
+Implements royalties and a proof-of-work.
 
-Provides a standard [ERC721](https://eips.ethereum.org/EIPS/eip-721) token interface plus [DSAuth](https://dapp.tools/dappsys/ds-auth)-protected `mint` and `burn` functions.
-
-Inspired by dapphub's [ds-token](https://github.com/dapphub/ds-token)
+based on 's [ds-deed](https://github.com/brianmcmichael/ds-deed.git)
 
 ### Custom Actions
 
-#### `mint`
-credit NFT at an address whilst simultaniously increasing user's `balanceOf`
-(requires auth)
+#### `work`
+returns true or false based to determine of the PoW passess.
 
-#### `burn`
-debit NFT at an address whilst simultaniously decreasing user's `balanceOf`
-(requires auth)
+#### `contractURI`
+Provides the contractURI interface for OpenSea. When passed to the constructor,
+this URI allows one to establish royalties and set other token-level metadata.
 
-### Aliases
+#### `royaltyInfo`
+Provides the EIP2981 royalty info interface.  When calling `mint()` this
+allows for the royalty info to be returned in compliance with EIP2981. 
 
-#### `push`
-safe transfer a nft from `msg.sender` to a given address (requires approval)
+#### `receivedRoyalties`
+Provides the EIP2981 event callback.  When a marketplace sends royalties related
+to a token on this ERC721, it should call this function.
 
-#### `pull`
-safe transfer a nft from a given address to `msg.sender` (requires approval)
+#### `getFeeRecipients`
+Provides the Rarible royalty V1 interface.  When calling `mint()` this
+allows for the royalty info to be returned in a rarible compliant format.
+NOTE: This contract can only handle 1 royalty address.  A royalty splitting
+contract must be used for multiple royalties.
 
-#### `move`
-safe transfer a nft from a given `src` address to a given `dst` address (requires approval)
+#### `getFeeBps`
+Provides the Rarible royalty V1 interface.  When calling `mint()` this
+allows for the royalty info to be returned in a rarible compliant format.
+NOTE: This contract can only handle 1 royalty address.  A royalty splitting
+contract must be used for multiple royalties.

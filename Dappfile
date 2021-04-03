@@ -1,6 +1,6 @@
-name            ds-deed
-description     ERC721 implementation with minting and burning
+name            HashDrop
+description     ERC721 implementation with royalties and PoW
 version         0.0.1
 
-author          Brian McMichael <brian@brianmcmichael.com>
+author          Enoch Groot <enochgroot@protonmail.com>
 license         GPL-3.0-or-later

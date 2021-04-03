@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-/// deed.sol -- basic ERC721 implementation
+/// hashdrop.sol -- ERC721 implementation with royalties and proof-of-work
 
-// Copyright (C) 2020  Brian McMichael
+// Copyright (C) 2020 Hashdrop
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@
 pragma solidity >=0.6.0;
 
 import "erc721/erc721.sol";
-import "./IERC2981Royalties.sol";
+import "./IEIP2981Royalties.sol";
 import "./IOpenSeaContractLevelMetadata.sol";
 import "./IRaribleRoyaltiesV1.sol";
 
-contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, IOpenSeaContractLevelMetadata, IRaribleRoyaltiesV1 {
+contract HashDrop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IOpenSeaContractLevelMetadata, IRaribleRoyaltiesV1 {
 
     uint8                            public   hard;
 
@@ -41,14 +41,14 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
 
     mapping (bytes4 => bool)         internal _interfaces;
 
-    uint256[]                        internal _allDeeds;
-    mapping (address => uint256[])   internal _usrDeeds;
-    mapping (uint256 => Deed)        internal _deeds;
+    uint256[]                        internal _allDrops;
+    mapping (address => uint256[])   internal _usrDrops;
+    mapping (uint256 => Drop)        internal _drops;
     mapping (address => mapping (address => bool)) internal _operators;
 
-    struct Deed {
-        uint256      pos;     // position in _allDeeds
-        uint256     upos;     // position in _usrDeeds
+    struct Drop {
+        uint256      pos;     // position in _allDrops
+        uint256     upos;     // position in _usrDrops
         address      guy;     // creator
         address approved;     // appoved usr
         uint256    nonce;     // nonce to prove work
@@ -75,6 +75,7 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
         _symbol = symbol;
         hard = _hard;
         _uri = uri;
+
         _addInterface(0x80ac58cd); // ERC721
         _addInterface(0x5b5e139f); // ERC721Metadata
         _addInterface(0x780e9d63); // ERC721Enumerable
@@ -88,21 +89,21 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
 
     modifier nod(uint256 nft) {
         require(
-            _deeds[nft].guy == msg.sender ||
-            _deeds[nft].approved == msg.sender ||
-            _operators[_deeds[nft].guy][msg.sender],
-            "ds-deed-insufficient-approval"
+            _drops[nft].guy == msg.sender ||
+            _drops[nft].approved == msg.sender ||
+            _operators[_drops[nft].guy][msg.sender],
+            "ds-drop-insufficient-approval"
         );
         _;
     }
 
     modifier stoppable {
-        require(!stopped, "ds-deed-is-stopped");
+        require(!stopped, "ds-drop-is-stopped");
         _;
     }
 
     modifier auth {
-        require(wards[msg.sender] == 1, "ds-deed-not-authorized");
+        require(wards[msg.sender] == 1, "ds-drop-not-authorized");
         _;
     }
 
@@ -119,20 +120,20 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
     }
 
     function totalSupply() external override view returns (uint256) {
-        return _allDeeds.length;
+        return _allDrops.length;
     }
 
     function tokenByIndex(uint256 idx) external override view returns (uint256) {
-        return _allDeeds[idx];
+        return _allDrops[idx];
     }
 
     function tokenOfOwnerByIndex(address guy, uint256 idx) external override view returns (uint256) {
-        require(idx < balanceOf(guy), "ds-deed-index-out-of-bounds");
-        return _usrDeeds[guy][idx];
+        require(idx < balanceOf(guy), "ds-drop-index-out-of-bounds");
+        return _usrDrops[guy][idx];
     }
 
     function onERC721Received(address, address, uint256, bytes calldata) external override returns(bytes4) {
-        revert("ds-deed-does-not-accept-tokens");
+        revert("ds-drop-does-not-accept-tokens");
     }
 
     function _isContract(address addr) private view returns (bool) {
@@ -151,13 +152,13 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
     }
 
     function balanceOf(address guy) public override view returns (uint256) {
-        require(guy != address(0), "ds-deed-invalid-address");
-        return _usrDeeds[guy].length;
+        require(guy != address(0), "ds-drop-invalid-address");
+        return _usrDrops[guy].length;
     }
 
     function ownerOf(uint256 nft) external override view returns (address) {
-        require(_deeds[nft].guy != address(0), "ds-deed-invalid-nft");
-        return _deeds[nft].guy;
+        require(_drops[nft].guy != address(0), "ds-drop-invalid-nft");
+        return _drops[nft].guy;
     }
 
     function safeTransferFrom(address src, address dst, uint256 nft, bytes calldata what) external override payable {
@@ -184,14 +185,14 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
         transferFrom(src, dst, nft);
         if (_isContract(dst)) {
             bytes4 res = ERC721TokenReceiver(dst).onERC721Received(msg.sender, src, nft, data);
-            require(res == this.onERC721Received.selector, "ds-deed-invalid-token-receiver");
+            require(res == this.onERC721Received.selector, "ds-drop-invalid-token-receiver");
         }
     }
 
     function transferFrom(address src, address dst, uint256 nft) public override payable stoppable nod(nft) {
-        require(src == _deeds[nft].guy, "ds-deed-src-not-valid");
-        require(dst != address(0) && dst != address(this), "ds-deed-unsafe-destination");
-        require(_deeds[nft].guy != address(0), "ds-deed-invalid-nft");
+        require(src == _drops[nft].guy, "ds-drop-src-not-valid");
+        require(dst != address(0) && dst != address(this), "ds-drop-unsafe-destination");
+        require(_drops[nft].guy != address(0), "ds-drop-invalid-nft");
         _upop(nft);
         _upush(dst, nft);
         _approve(address(0), nft);
@@ -203,19 +204,19 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
     }
 
     function _mint(address guy, string memory uri, uint256 nonce, address gal, uint256 fee) internal returns (uint256 nft) {
-        require(guy != address(0), "ds-deed-invalid-address");
-        require(fee <= 10_000_000, "ds-deed-invalid-fee");
+        require(guy != address(0), "ds-drop-invalid-address");
+        require(fee <= 10_000_000, "ds-drop-invalid-fee");
 
         nft = _ids++;
-        require(work(nft, nonce, hard), "ds-deed-failed-work");
+        require(work(nft, nonce, hard), "ds-drop-failed-work");
         hard = hard + 1;
 
         gal = (gal != address(0)) ? gal : guy;
 
-        _allDeeds.push(nft);
-        _deeds[nft] = Deed(
-            _allDeeds[_allDeeds.length - 1],
-            _usrDeeds[guy].length - 1,
+        _allDrops.push(nft);
+        _drops[nft] = Drop(
+            _allDrops[_allDrops.length - 1],
+            _usrDrops[guy].length - 1,
             guy,
             address(0),
             nonce,
@@ -241,35 +242,35 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
     }
 
     function _burn(uint256 nft) internal {
-        address guy = _deeds[nft].guy;
-        require(guy != address(0), "ds-deed-invalid-nft");
+        address guy = _drops[nft].guy;
+        require(guy != address(0), "ds-drop-invalid-nft");
 
-        uint256 _idx        = _deeds[nft].pos;
-        uint256 _mov        = _allDeeds[_allDeeds.length - 1];
-        _allDeeds[_idx]     = _mov;
-        _deeds[_mov].pos    = _idx;
-        _allDeeds.pop();    // Remove from All deed array
-        _upop(nft);         // Remove from User deed array
+        uint256 _idx        = _drops[nft].pos;
+        uint256 _mov        = _allDrops[_allDrops.length - 1];
+        _allDrops[_idx]     = _mov;
+        _drops[_mov].pos    = _idx;
+        _allDrops.pop();    // Remove from All drop array
+        _upop(nft);         // Remove from User drop array
 
-        delete _deeds[nft]; // Remove from deed mapping
+        delete _drops[nft]; // Remove from drop mapping
 
         emit Transfer(guy, address(0), nft);
     }
 
     function _upush(address guy, uint256 nft) internal {
-        _deeds[nft].upos           = _usrDeeds[guy].length;
-        _usrDeeds[guy].push(nft);
-        _deeds[nft].guy            = guy;
+        _drops[nft].upos           = _usrDrops[guy].length;
+        _usrDrops[guy].push(nft);
+        _drops[nft].guy            = guy;
     }
 
     function _upop(uint256 nft) internal {
-        uint256[] storage _udds    = _usrDeeds[_deeds[nft].guy];
-        uint256           _uidx    = _deeds[nft].upos;
+        uint256[] storage _udds    = _usrDrops[_drops[nft].guy];
+        uint256           _uidx    = _drops[nft].upos;
         uint256           _move    = _udds[_udds.length - 1];
         _udds[_uidx]               = _move;
-        _deeds[_move].upos         = _uidx;
+        _drops[_move].upos         = _uidx;
         _udds.pop();
-        _usrDeeds[_deeds[nft].guy] = _udds;
+        _usrDrops[_drops[nft].guy] = _udds;
     }
 
     function approve(address guy, uint256 nft) external override payable stoppable nod(nft) {
@@ -277,7 +278,7 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
     }
 
     function _approve(address guy, uint256 nft) internal {
-        _deeds[nft].approved = guy;
+        _drops[nft].approved = guy;
         emit Approval(msg.sender, guy, nft);
     }
 
@@ -287,8 +288,8 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
     }
 
     function getApproved(uint256 nft) external override returns (address) {
-        require(_deeds[nft].guy != address(0), "ds-deed-invalid-nft");
-        return _deeds[nft].approved;
+        require(_drops[nft].guy != address(0), "ds-drop-invalid-nft");
+        return _drops[nft].approved;
     }
 
     function isApprovedForAll(address guy, address op) external override view returns (bool) {
@@ -337,7 +338,7 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
     }
 
     function royaltyInfo(uint256 nft) public override returns (address receiver, uint256 amount) {
-        return (_deeds[nft].gal, _deeds[nft].fee);
+        return (_drops[nft].gal, _drops[nft].fee);
     }
 
     function receivedRoyalties(address gal, address buyer, uint256 nft, address gem, uint256 fee) public override {
@@ -346,13 +347,13 @@ contract DSDeed is ERC721, ERC721Enumerable, ERC721Metadata, IERC2981Royalties, 
 
     function getFeeRecipients(uint256 nft) external view override returns (address payable[] memory) {
         address payable[] memory result = new address payable[](1);
-        result[0] = payable(_deeds[nft].gal);
+        result[0] = payable(_drops[nft].gal);
         return result;
     }
 
     function getFeeBps(uint256 nft) external view override returns (uint[] memory) {
         uint[] memory result = new uint[](1);
-        result[0] = _deeds[nft].fee / 1_000;
+        result[0] = _drops[nft].fee / 1_000;
         return result;
     }
 

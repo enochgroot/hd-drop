@@ -11,6 +11,10 @@ interface IEIP2981Royalties {
         uint256 _amount
     );
 
-    function royaltyInfo(uint256 nft) external returns (address gal, uint256 fee);
-    function receivedRoyalties(address gal, address buyer, uint256 nft, address gem, uint256 fee) external;
+    function royaltyInfo(
+        uint256 nft
+    ) external returns (address gal, uint256 fee);
+    function receivedRoyalties(
+        address gal, address buyer, uint256 nft, address gem, uint256 fee
+    ) external;
 }

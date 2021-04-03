@@ -24,7 +24,14 @@ import "./IEIP2981Royalties.sol";
 import "./IOpenSeaContractLevelMetadata.sol";
 import "./IRaribleRoyaltiesV1.sol";
 
-contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IOpenSeaContractLevelMetadata, IRaribleRoyaltiesV1 {
+contract Drop is
+    ERC721,
+    ERC721Enumerable,
+    ERC721Metadata,
+    IEIP2981Royalties,
+    IOpenSeaContractLevelMetadata,
+    IRaribleRoyaltiesV1
+    {
 
     uint8                            public   hard;
 
@@ -70,7 +77,12 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
         require(y == 0 || (z = x * y) / y == x);
     }
 
-    constructor(string memory name, string memory symbol, uint8 _hard, string memory uri) public {
+    constructor(
+        string memory name,
+        string memory symbol,
+        uint8 _hard,
+        string memory uri
+    ) public {
         _name = name;
         _symbol = symbol;
         hard = _hard;
@@ -92,18 +104,18 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
             _drops[nft].guy == msg.sender ||
             _drops[nft].approved == msg.sender ||
             _operators[_drops[nft].guy][msg.sender],
-            "ds-drop-insufficient-approval"
+            "hd-drop-insufficient-approval"
         );
         _;
     }
 
     modifier stoppable {
-        require(!stopped, "ds-drop-is-stopped");
+        require(!stopped, "hd-drop-is-stopped");
         _;
     }
 
     modifier auth {
-        require(wards[msg.sender] == 1, "ds-drop-not-authorized");
+        require(wards[msg.sender] == 1, "hd-drop-not-authorized");
         _;
     }
 
@@ -115,7 +127,9 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
         return _symbol;
     }
 
-    function tokenURI(uint256 nft) external override view returns (string memory) {
+    function tokenURI(
+        uint256 nft
+    ) external override view returns (string memory) {
         return _uris[nft];
     }
 
@@ -123,27 +137,37 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
         return _allDrops.length;
     }
 
-    function tokenByIndex(uint256 idx) external override view returns (uint256) {
+    function tokenByIndex(
+        uint256 idx
+    ) external override view returns (uint256) {
         return _allDrops[idx];
     }
 
-    function tokenOfOwnerByIndex(address guy, uint256 idx) external override view returns (uint256) {
-        require(idx < balanceOf(guy), "ds-drop-index-out-of-bounds");
+    function tokenOfOwnerByIndex(
+        address guy, uint256 idx
+    ) external override view returns (uint256) {
+        require(idx < balanceOf(guy), "hd-drop-index-out-of-bounds");
         return _usrDrops[guy][idx];
     }
 
-    function onERC721Received(address, address, uint256, bytes calldata) external override returns(bytes4) {
-        revert("ds-drop-does-not-accept-tokens");
+    function onERC721Received(
+        address, address, uint256, bytes calldata
+    ) external override returns(bytes4) {
+        revert("hd-drop-does-not-accept-tokens");
     }
 
     function _isContract(address addr) private view returns (bool) {
         bytes32 codehash;
-        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470; // EIP-1052
+        // EIP-1052
+        bytes32 accountHash =
+            0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         assembly { codehash := extcodehash(addr) }
         return (codehash != accountHash && codehash != 0x0);
     }
 
-    function supportsInterface(bytes4 interfaceID) external override view returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceID
+    ) external override view returns (bool) {
         return _interfaces[interfaceID];
     }
 
@@ -152,20 +176,24 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
     }
 
     function balanceOf(address guy) public override view returns (uint256) {
-        require(guy != address(0), "ds-drop-invalid-address");
+        require(guy != address(0), "hd-drop-invalid-address");
         return _usrDrops[guy].length;
     }
 
     function ownerOf(uint256 nft) external override view returns (address) {
-        require(_drops[nft].guy != address(0), "ds-drop-invalid-nft");
+        require(_drops[nft].guy != address(0), "hd-drop-invalid-nft");
         return _drops[nft].guy;
     }
 
-    function safeTransferFrom(address src, address dst, uint256 nft, bytes calldata what) external override payable {
+    function safeTransferFrom(
+        address src, address dst, uint256 nft, bytes calldata what
+    ) external override payable {
         _safeTransfer(src, dst, nft, what);
     }
 
-    function safeTransferFrom(address src, address dst, uint256 nft) public override payable {
+    function safeTransferFrom(
+        address src, address dst, uint256 nft
+    ) public override payable {
         _safeTransfer(src, dst, nft, "");
     }
 
@@ -181,34 +209,50 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
         safeTransferFrom(src, dst, nft);
     }
 
-    function _safeTransfer(address src, address dst, uint256 nft, bytes memory data) internal {
+    function _safeTransfer(
+        address src, address dst, uint256 nft, bytes memory data
+    ) internal {
         transferFrom(src, dst, nft);
         if (_isContract(dst)) {
-            bytes4 res = ERC721TokenReceiver(dst).onERC721Received(msg.sender, src, nft, data);
-            require(res == this.onERC721Received.selector, "ds-drop-invalid-token-receiver");
+            bytes4 res = ERC721TokenReceiver(dst).onERC721Received(
+                msg.sender, src, nft, data
+            );
+            require(
+                res == this.onERC721Received.selector,
+                "hd-drop-invalid-token-receiver"
+            );
         }
     }
 
-    function transferFrom(address src, address dst, uint256 nft) public override payable stoppable nod(nft) {
-        require(src == _drops[nft].guy, "ds-drop-src-not-valid");
-        require(dst != address(0) && dst != address(this), "ds-drop-unsafe-destination");
-        require(_drops[nft].guy != address(0), "ds-drop-invalid-nft");
+    function transferFrom(
+        address src, address dst, uint256 nft
+    ) public override payable stoppable nod(nft) {
+        require(src == _drops[nft].guy, "hd-drop-src-not-valid");
+        require(
+            dst != address(0) && dst != address(this),
+            "hd-drop-unsafe-destination"
+        );
+        require(_drops[nft].guy != address(0), "hd-drop-invalid-nft");
         _upop(nft);
         _upush(dst, nft);
         _approve(address(0), nft);
         emit Transfer(src, dst, nft);
     }
 
-    function mint(address guy, string memory uri, uint256 nonce, address gal, uint256 fee) public auth stoppable returns (uint256 nft) {
+    function mint(
+        address guy, string memory uri, uint256 nonce, address gal, uint256 fee
+    ) public auth stoppable returns (uint256 nft) {
         return _mint(guy, uri, nonce, address(gal), fee);
     }
 
-    function _mint(address guy, string memory uri, uint256 nonce, address gal, uint256 fee) internal returns (uint256 nft) {
-        require(guy != address(0), "ds-drop-invalid-address");
-        require(fee <= 10_000_000, "ds-drop-invalid-fee");
+    function _mint(
+        address guy, string memory uri, uint256 nonce, address gal, uint256 fee
+    ) internal returns (uint256 nft) {
+        require(guy != address(0), "hd-drop-invalid-address");
+        require(fee <= 10_000_000, "hd-drop-invalid-fee");
 
         nft = _ids++;
-        require(work(nft, nonce, hard), "ds-drop-failed-work");
+        require(work(nft, nonce, hard), "hd-drop-failed-work");
         hard = hard + 1;
 
         gal = (gal != address(0)) ? gal : guy;
@@ -243,7 +287,7 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
 
     function _burn(uint256 nft) internal {
         address guy = _drops[nft].guy;
-        require(guy != address(0), "ds-drop-invalid-nft");
+        require(guy != address(0), "hd-drop-invalid-nft");
 
         uint256 _idx        = _drops[nft].pos;
         uint256 _mov        = _allDrops[_allDrops.length - 1];
@@ -273,7 +317,9 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
         _usrDrops[_drops[nft].guy] = _udds;
     }
 
-    function approve(address guy, uint256 nft) external override payable stoppable nod(nft) {
+    function approve(
+        address guy, uint256 nft
+    ) external override payable stoppable nod(nft) {
         _approve(guy, nft);
     }
 
@@ -282,34 +328,51 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
         emit Approval(msg.sender, guy, nft);
     }
 
-    function setApprovalForAll(address op, bool ok) external override stoppable {
+    function setApprovalForAll(
+        address op, bool ok
+    ) external override stoppable {
         _operators[msg.sender][op] = ok;
         emit ApprovalForAll(msg.sender, op, ok);
     }
 
     function getApproved(uint256 nft) external override returns (address) {
-        require(_drops[nft].guy != address(0), "ds-drop-invalid-nft");
+        require(_drops[nft].guy != address(0), "hd-drop-invalid-nft");
         return _drops[nft].approved;
     }
 
-    function isApprovedForAll(address guy, address op) external override view returns (bool) {
+    function isApprovedForAll(
+        address guy, address op
+    ) external override view returns (bool) {
         return _operators[guy][op];
     }
 
-    function _lshift(bytes32 bits, uint256 shift) internal pure returns (bytes32) {
+    function _lshift(
+        bytes32 bits, uint256 shift
+    ) internal pure returns (bytes32) {
         return bytes32(mul(uint256(bits), 2 ** shift));
     }
 
-    function _firstn(bytes32 bits, uint256 num) internal pure returns (bytes32) {
+    function _firstn(
+        bytes32 bits, uint256 num
+    ) internal pure returns (bytes32) {
         bytes32 ones = bytes32(sub(2 ** num, 1));
         bytes32 mask = _lshift(ones, sub(256, num));
         return bits & mask;
     } 
 
-    // validate a proof-of-work for a given NFT, with a nonce, at a difficulty level
-    function work(uint256 id, uint256 nonce, uint8 difficulty) public view returns (bool) {
-        bytes32 candidate = _firstn(keccak256(abi.encodePacked(address(this), id, nonce)), difficulty);
-        bytes32 target = _firstn(bytes32(uint256(address(this)) << 96), difficulty);
+    // validates a proof-of-work for a given NFT, with a supplied nonce
+    // at a given difficulty level
+    function work(
+        uint256 id, uint256 nonce, uint8 difficulty
+    ) public view returns (bool) {
+        bytes32 candidate = _firstn(
+            keccak256(abi.encodePacked(address(this), id, nonce)),
+            difficulty
+        );
+        bytes32 target = _firstn(
+            bytes32(uint256(address(this)) << 96),
+            difficulty
+        );
         return (candidate == target);
     }
 
@@ -337,21 +400,29 @@ contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IO
         _uris[nft] = uri;
     }
 
-    function royaltyInfo(uint256 nft) public override returns (address receiver, uint256 amount) {
+    function royaltyInfo(
+        uint256 nft
+    ) public override returns (address receiver, uint256 amount) {
         return (_drops[nft].gal, _drops[nft].fee);
     }
 
-    function receivedRoyalties(address gal, address buyer, uint256 nft, address gem, uint256 fee) public override {
+    function receivedRoyalties(
+        address gal, address buyer, uint256 nft, address gem, uint256 fee
+    ) public override {
         emit ReceivedRoyalties(gal, buyer, nft, gem, fee);
     }
 
-    function getFeeRecipients(uint256 nft) external view override returns (address payable[] memory) {
+    function getFeeRecipients(
+        uint256 nft
+    ) external view override returns (address payable[] memory) {
         address payable[] memory result = new address payable[](1);
         result[0] = payable(_drops[nft].gal);
         return result;
     }
 
-    function getFeeBps(uint256 nft) external view override returns (uint[] memory) {
+    function getFeeBps(
+        uint256 nft
+    ) external view override returns (uint[] memory) {
         uint[] memory result = new uint[](1);
         result[0] = _drops[nft].fee / 1_000;
         return result;

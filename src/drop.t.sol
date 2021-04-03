@@ -21,7 +21,9 @@ contract DropUser {
         drop.safeTransferFrom(from, to, nft);
     }
 
-    function doSafeTransferFrom(address from, address to, uint nft, bytes memory data) public {
+    function doSafeTransferFrom(
+        address from, address to, uint nft, bytes memory data
+    ) public {
         drop.safeTransferFrom(from, to, nft, data);
     }
 
@@ -47,7 +49,9 @@ contract DropUser {
         drop.move(src, dst, nft);
     }
 
-    function onERC721Received(address, address, uint256, bytes calldata) external pure returns(bytes4) {
+    function onERC721Received(
+        address, address, uint256, bytes calldata
+    ) external pure returns(bytes4) {
         return this.onERC721Received.selector;
     }
 }
@@ -56,7 +60,9 @@ contract TokenReceiver {
 
     uint256 public tokensReceived;
 
-    function onERC721Received(address, address, uint256, bytes calldata) external returns (bytes4) {
+    function onERC721Received(
+        address, address, uint256, bytes calldata
+    ) external returns (bytes4) {
         tokensReceived++;
         return this.onERC721Received.selector;
     }
@@ -175,18 +181,27 @@ contract DropTest is DSTest {
     ///  This event emits when NFTs are created (`from` == 0) and destroyed
     ///  (`to` == 0). Exception: during contract creation, any number of NFTs
     ///  may be created and assigned without emitting Transfer. At the time of
-    ///  any transfer, the approved address for that NFT (if any) is reset to none.
-    //event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+    ///  any transfer, the approved address for that NFT (if any) is reset to
+    ///  none.
+    // event Transfer(
+    //     address indexed _from, address indexed _to, uint256 indexed _tokenId
+    // );
 
     /// dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
     ///  When a Transfer event emits, this also indicates that the approved
     ///  address for that NFT (if any) is reset to none.
-    //event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
+    // event Approval(
+    //     address indexed _owner,
+    //     address indexed _approved,
+    //     uint256 indexed _tokenId
+    // );
 
     /// dev This emits when an operator is enabled or disabled for an owner.
     ///  The operator can manage all NFTs of the owner.
-    //event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+    // event ApprovalForAll(
+    //     address indexed _owner, address indexed _operator, bool _approved
+    // );
 
     /// notice Count all NFTs assigned to an owner
     /// dev NFTs assigned to the zero address are considered invalid, and this
@@ -240,23 +255,29 @@ contract DropTest is DSTest {
 
     function testFailOwnerOf() public {
         drop.mint(address(this), _uri, NONCE, address(this), 0);
-        drop.transferFrom(address(this), address(0), 0); // We can't test revert on check of address(0) because we can't transfer to address(0)
+        // We can't test revert on check of address(0) because we can't
+        // transfer to address(0)
+        drop.transferFrom(address(this), address(0), 0);
         drop.ownerOf(0);
     }
 
-    /// notice Transfers the ownership of an NFT from one address to another address
-    /// dev Throws unless `msg.sender` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `_to` is the zero address. Throws if
-    ///  `_tokenId` is not a valid NFT. When transfer is complete, this function
-    ///  checks if `_to` is a smart contract (code size > 0). If so, it calls
-    ///  `onERC721Received` on `_to` and throws if the return value is not
-    ///  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
+    /// notice Transfers the ownership of an NFT from one address to another
+    /// address dev Throws unless `msg.sender` is the current owner, an
+    /// authorized operator, or the approved address for this NFT. Throws if
+    /// `_from` is ///  not the current owner. Throws if `_to` is the zero
+    /// address. Throws if ///  `_tokenId` is not a valid NFT. When transfer is
+    /// complete, this function ///  checks if `_to` is a smart contract
+    /// (code size > 0). If so, it calls `onERC721Received` on `_to` and throws
+    /// if the return value is not
+    /// `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
     /// param _from The current owner of the NFT
     /// param _to The new owner
     /// param _tokenId The NFT to transfer
-    /// param data Additional data with no specified format, sent in call to `_to`
-    //function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes data) external payable;
+    /// param data Additional data with no specified format, sent in call to
+    /// `_to`
+    // function safeTransferFrom(
+    //     address _from, address _to, uint256 _tokenId, bytes data
+    // ) external payable;
     function testSafeTransferFromWithData() public {
         drop.mint(address(alice), "", NONCE, address(alice), 0);
 
@@ -269,20 +290,24 @@ contract DropTest is DSTest {
     function testSafeTransferFromContractWithData() public {
         drop.mint(address(alice), "", NONCE, address(alice), 0);
 
-        alice.doSafeTransferFrom(address(alice), address(receiver), 0, "Some data");
+        alice.doSafeTransferFrom(
+            address(alice), address(receiver), 0, "Some data"
+        );
 
         assertEq(drop.ownerOf(0), address(receiver));
         assertEq(receiver.tokensReceived(), 1); // Ensure receiver was called.
     }
 
 
-    /// notice Transfers the ownership of an NFT from one address to another address
-    /// dev This works identically to the other function with an extra data parameter,
-    ///  except this function just sets data to "".
+    /// notice Transfers the ownership of an NFT from one address to another
+    /// address dev This works identically to the other function with an extra
+    /// data parameter, except this function just sets data to "".
     /// param _from The current owner of the NFT
     /// param _to The new owner
     /// param _tokenId The NFT to transfer
-    //function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable;
+    // function safeTransferFrom(
+    //     address _from, address _to, uint256 _tokenId
+    // ) external payable;
     function testSafeTransferFromEOA() public {
         drop.mint(address(alice), "", NONCE, address(alice), 0);
 
@@ -303,7 +328,7 @@ contract DropTest is DSTest {
 
     function testFailSafeTransferFromBadContract() public {
         drop.mint(address(alice), "", NONCE, address(alice), 0);
-        // it calls
+        /// it calls
         ///  `onERC721Received` on `_to` and throws if the return value is not
         ///  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
         alice.doSafeTransferFrom(address(alice), address(badreceiver), 0);
@@ -331,7 +356,9 @@ contract DropTest is DSTest {
     /// param _from The current owner of the NFT
     /// param _to The new owner
     /// param _tokenId The NFT to transfer
-    //function transferFrom(address _from, address _to, uint256 _tokenId) external payable;
+    // function transferFrom(
+    //     address _from, address _to, uint256 _tokenId
+    // ) external payable;
     function testTransferFrom() public {
         drop.mint(address(alice), "", NONCE, address(alice), 0);
 
@@ -412,8 +439,8 @@ contract DropTest is DSTest {
         bob.doApprove(address(this), 0);
     }
 
-    /// notice Enable or disable approval for a third party ("operator") to manage
-    ///  all of `msg.sender`'s assets
+    /// notice Enable or disable approval for a third party ("operator") to
+    /// manage all of `msg.sender`'s assets
     /// dev Emits the ApprovalForAll event. The contract MUST allow
     ///  multiple operators per owner.
     /// param _operator Address to add to the set of authorized operators
@@ -462,8 +489,11 @@ contract DropTest is DSTest {
     /// notice Query if an address is an authorized operator for another address
     /// param _owner The address that owns the NFTs
     /// param _operator The address that acts on behalf of the owner
-    /// return True if `_operator` is an approved operator for `_owner`, false otherwise
-    //function isApprovedForAll(address _owner, address _operator) external view returns (bool);
+    /// return True if `_operator` is an approved operator for `_owner`, false
+    /// otherwise
+    // function isApprovedForAll(
+    //     address _owner, address _operator
+    // ) external view returns (bool);
     function testIsApprovedForAll() public {
         assertTrue(!drop.isApprovedForAll(address(alice), address(bob)));
         alice.doSetApprovalForAll(address(bob), true);
@@ -502,7 +532,9 @@ contract DropTest is DSTest {
     /// param _data Additional data with no specified format
     /// return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     ///  unless throwing
-    //function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes _data) external returns(bytes4);
+    // function onERC721Received(
+    //     address _operator, address _from, uint256 _tokenId, bytes _data
+    // ) external returns(bytes4);
     function testFailOnERC721Received() public {
         drop.mint(address(alice), "", NONCE, address(alice), 0);
         drop.onERC721Received(address(alice), address(alice), 0, "");
@@ -617,14 +649,16 @@ contract DropTest is DSTest {
     }
 
     function testIERC2981Royalties10() public {
-        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 1_000_000); // 10% fee
+        // 10% fee
+        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 1_000_000);
         (address gal, uint256 fee) = drop.royaltyInfo(nft);
         assertEq(gal, address(alice));
         assertEq(fee, 1_000_000);
     }
 
     function testIRaribleRoyaltiesV1_10() public {
-        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 1_000_000); // 10% fee
+        // 10% fee
+        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 1_000_000);
         address payable[] memory gals = new address payable[](1);
         gals = drop.getFeeRecipients(nft);
         uint[] memory fees = new uint[](1);
@@ -634,14 +668,16 @@ contract DropTest is DSTest {
     }
 
     function testIERC2981Royalties100() public {
-        uint256 nft = drop.mint(_addr, _uri, NONCE, address(bob), 10_000_000); // 100% fee
+        // 100% fee
+        uint256 nft = drop.mint(_addr, _uri, NONCE, address(bob), 10_000_000);
         (address gal, uint256 fee) = drop.royaltyInfo(nft);
         assertEq(gal, address(bob));
         assertEq(fee, 10_000_000);
     }
 
     function testIRaribleRoyaltiesV1_100() public {
-        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 10_000_000); // 100% fee
+        // 100% fee
+        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 10_000_000);
         address payable[] memory gals = new address payable[](1);
         gals = drop.getFeeRecipients(nft);
         uint[] memory fees = new uint[](1);
@@ -651,14 +687,16 @@ contract DropTest is DSTest {
     }
 
     function testERC2981Royalties01() public {
-        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 10_000); // 0.1% fee
+        // 0.1% fee
+        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 10_000);
         (address gal, uint256 fee) = drop.royaltyInfo(nft);
         assertEq(gal, address(alice));
         assertEq(fee, 10_000);
     }
 
     function testIRaribleRoyaltiesV1_01() public {
-        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 10_000); // 0.1% fee
+        // 0.1% fee
+        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 10_000);
         address payable[] memory gals = new address payable[](1);
         gals = drop.getFeeRecipients(nft);
         uint[] memory fees = new uint[](1);
@@ -668,14 +706,16 @@ contract DropTest is DSTest {
     }
 
     function testERC2981Royalties00001() public {
-        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 1); // 0.00001% fee
+        // 0.00001% fee
+        uint256 nft = drop.mint(_addr, _uri, NONCE, address(alice), 1);
         (address gal, uint256 fee) = drop.royaltyInfo(nft);
         assertEq(gal, address(alice));
         assertEq(fee, 1);
     }
 
     function testIERC2981Royalties0() public {
-        uint256 nft = drop.mint(_addr, _uri, NONCE, _addr, 0); // 0% fee
+        // 0% fee
+        uint256 nft = drop.mint(_addr, _uri, NONCE, _addr, 0);
         (address gal, uint256 fee) = drop.royaltyInfo(nft);
         assertEq(gal, _addr);
         assertEq(fee, 0);
@@ -745,7 +785,9 @@ contract DropTest is DSTest {
         assertEq(drop.tokenByIndex(1), 1);
     }
 
-    //function tokenOfOwnerByIndex(address guy, uint256 idx) external view returns (uint256);
+    // function tokenOfOwnerByIndex(
+    //     address guy, uint256 idx
+    // ) external view returns (uint256);
     /// notice Enumerate NFTs assigned to an owner
     /// dev Throws if `_index` >= `balanceOf(_owner)` or if
     ///  `_owner` is the zero address, representing invalid NFTs.

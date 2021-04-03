@@ -4,7 +4,7 @@ _An ERC721 Token based on DSDeed_
 
 Implements royalties and a proof-of-work.
 
-based on 's [ds-deed](https://github.com/brianmcmichael/ds-deed.git)
+Based on Brian McMichael's [ds-deed](https://github.com/brianmcmichael/ds-deed.git)
 
 ### Custom Actions
 

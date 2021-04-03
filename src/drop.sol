@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-/// hashdrop.sol -- ERC721 implementation with royalties and proof-of-work
+/// drop.sol -- ERC721 implementation with royalties and proof-of-work
 
 // Copyright (C) 2020 Hashdrop
 
@@ -24,7 +24,7 @@ import "./IEIP2981Royalties.sol";
 import "./IOpenSeaContractLevelMetadata.sol";
 import "./IRaribleRoyaltiesV1.sol";
 
-contract HashDrop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IOpenSeaContractLevelMetadata, IRaribleRoyaltiesV1 {
+contract Drop is ERC721, ERC721Enumerable, ERC721Metadata, IEIP2981Royalties, IOpenSeaContractLevelMetadata, IRaribleRoyaltiesV1 {
 
     uint8                            public   hard;
 

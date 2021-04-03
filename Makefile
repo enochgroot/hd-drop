@@ -1,4 +1,4 @@
 all    :; dapp build
 clean  :; dapp clean
 test   :; dapp test -v
-deploy :; dapp create HashDrop
+deploy :; dapp create Drop

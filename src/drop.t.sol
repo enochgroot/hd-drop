@@ -3,13 +3,13 @@ pragma solidity >=0.4.20;
 
 import "ds-test/test.sol";
 
-import "./hashdrop.sol";
+import "./drop.sol";
 
 contract DropUser {
 
-    HashDrop drop;
+    Drop drop;
 
-    constructor(HashDrop _drop) public {
+    constructor(Drop _drop) public {
         drop = _drop;
     }
 
@@ -65,8 +65,8 @@ contract TokenReceiver {
 contract BadTokenReceiver { uint256 one = 0; }
 
 
-contract HashDropTest is DSTest {
-    HashDrop drop;
+contract DropTest is DSTest {
+    Drop drop;
 
     string  _name        = "TestToken";
     string  _symb        = "TEST";
@@ -92,7 +92,7 @@ contract HashDropTest is DSTest {
     BadTokenReceiver badreceiver;
 
     function setUp() public {
-        drop  = new HashDrop(_name, _symb, 0, _contractURI);
+        drop  = new Drop(_name, _symb, 0, _contractURI);
         alice = new DropUser(drop);
         bob   = new DropUser(drop);
 

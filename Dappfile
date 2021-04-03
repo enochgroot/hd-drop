@@ -1,4 +1,4 @@
-name            HashDrop
+name            hd-drop
 description     ERC721 implementation with royalties and PoW
 version         0.0.1
 

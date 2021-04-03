@@ -24,7 +24,7 @@ import "./IEIP2981Royalties.sol";
 import "./IOpenSeaContractLevelMetadata.sol";
 import "./IRaribleRoyaltiesV1.sol";
 
-contract Drop is
+contract HDDrop is
     ERC721,
     ERC721Enumerable,
     ERC721Metadata,

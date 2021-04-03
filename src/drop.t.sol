@@ -5,11 +5,11 @@ import "ds-test/test.sol";
 
 import "./drop.sol";
 
-contract DropUser {
+contract HDDropUser {
 
-    Drop drop;
+    HDDrop drop;
 
-    constructor(Drop _drop) public {
+    constructor(HDDrop _drop) public {
         drop = _drop;
     }
 
@@ -71,8 +71,8 @@ contract TokenReceiver {
 contract BadTokenReceiver { uint256 one = 0; }
 
 
-contract DropTest is DSTest {
-    Drop drop;
+contract HDDropTest is DSTest {
+    HDDrop drop;
 
     string  _name        = "TestToken";
     string  _symb        = "TEST";
@@ -92,15 +92,15 @@ contract DropTest is DSTest {
     uint256 public constant NONCE8 = 392;
     uint256 public constant NONCE9 = 646;
 
-    DropUser alice;
-    DropUser bob;
+    HDDropUser alice;
+    HDDropUser bob;
     TokenReceiver receiver;
     BadTokenReceiver badreceiver;
 
     function setUp() public {
-        drop  = new Drop(_name, _symb, 0, _contractURI);
-        alice = new DropUser(drop);
-        bob   = new DropUser(drop);
+        drop  = new HDDrop(_name, _symb, 0, _contractURI);
+        alice = new HDDropUser(drop);
+        bob   = new HDDropUser(drop);
 
         receiver = new TokenReceiver();
         badreceiver = new BadTokenReceiver();

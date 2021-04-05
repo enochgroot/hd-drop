@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity >=0.4.20;
+
+pragma solidity ^0.6.12;
 
 import "ds-test/test.sol";
-
 import "./drop.sol";
 
 contract HDDropUser {
@@ -84,13 +84,13 @@ contract HDDropTest is DSTest {
     uint256 public constant NONCE  = 0;
     uint256 public constant NONCE1 = 5;
     uint256 public constant NONCE2 = 11;
-    uint256 public constant NONCE3 = 6;
-    uint256 public constant NONCE4 = 10;
-    uint256 public constant NONCE5 = 24;
-    uint256 public constant NONCE6 = 48;
-    uint256 public constant NONCE7 = 38;
-    uint256 public constant NONCE8 = 392;
-    uint256 public constant NONCE9 = 646;
+    uint256 public constant NONCE3 = 2;
+    uint256 public constant NONCE4 = 20;
+    uint256 public constant NONCE5 = 34;
+    uint256 public constant NONCE6 = 14;
+    uint256 public constant NONCE7 = 36;
+    uint256 public constant NONCE8 = 70;
+    uint256 public constant NONCE9 = 904;
 
     HDDropUser alice;
     HDDropUser bob;
@@ -569,11 +569,9 @@ contract HDDropTest is DSTest {
     }
 
     function testWork() public {
-        assertEq(address(drop), 0xE58d97b6622134C0436d60daeE7FBB8b965D9713);
-
         // for(uint256 i = 0; i < 100000; i++) {
-        //     if (drop.work(9, i, 9)) {
-        //         assertEq(i, 9);
+        //     if (drop.work(0, i, 0)) {
+        //         assertEq(i, 0);
         //         break;
         //     }
         // }
@@ -640,12 +638,11 @@ contract HDDropTest is DSTest {
     }
 
     function testFailWork() public {
-        assertEq(address(drop), 0xE58d97b6622134C0436d60daeE7FBB8b965D9713);
         assertEq(uint(drop.hard()), 0);
         drop.mint(_addr, _uri, 0, _addr, 0);
         assertEq(uint(drop.hard()), 1);
 
-        assertTrue(drop.work(1, 0, 1));
+        assertTrue(drop.work(1, 2, 1));
     }
 
     function testIERC2981Royalties10() public {

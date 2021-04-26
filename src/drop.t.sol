@@ -568,74 +568,78 @@ contract HDDropTest is DSTest {
         assertEq(drop.tokenURI(1), "t2");
     }
 
-    function testWork() public {
-        // for(uint256 i = 0; i < 100000; i++) {
-        //     if (drop.work(0, i, 0)) {
-        //         assertEq(i, 0);
-        //         break;
-        //     }
-        // }
+    // function testTempWork() public {
+    //     assertTrue(drop.tWork(4, 131053351, 28));
+    // }
 
-        // test for hard = 0
-        uint256 nft = drop.mint(_addr, _uri, NONCE, _addr, 0);
-        assertEq(nft, 0);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE, drop.hard() - 1));
+    // function testWork() public {
+    //     // for(uint256 i = 0; i < 100000; i++) {
+    //     //     if (drop.work(0, i, 0)) {
+    //     //         assertEq(i, 0);
+    //     //         break;
+    //     //     }
+    //     // }
 
-        // test for hard = 1
-        nft = drop.mint(_addr, _uri, NONCE1, _addr, 0);
-        assertEq(nft, 1);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE1, drop.hard() - 1));
+    //     // test for hard = 0
+    //     uint256 nft = drop.mint(_addr, _uri, NONCE, _addr, 0);
+    //     assertEq(nft, 0);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE, drop.hard() - 1));
 
-        // test for hard = 2
-        nft = drop.mint(_addr, _uri, NONCE2, _addr, 0);
-        assertEq(nft, 2);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE2, drop.hard() - 1));
+    //     // test for hard = 1
+    //     nft = drop.mint(_addr, _uri, NONCE1, _addr, 0);
+    //     assertEq(nft, 1);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE1, drop.hard() - 1));
 
-        // test for hard = 3
-        nft = drop.mint(_addr, _uri, NONCE3, _addr, 0);
-        assertEq(nft, 3);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE3, drop.hard() - 1));
+    //     // test for hard = 2
+    //     nft = drop.mint(_addr, _uri, NONCE2, _addr, 0);
+    //     assertEq(nft, 2);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE2, drop.hard() - 1));
 
-        // test for hard = 4
-        nft = drop.mint(_addr, _uri, NONCE4, _addr, 0);
-        assertEq(nft, 4);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE4, drop.hard() - 1));
+    //     // test for hard = 3
+    //     nft = drop.mint(_addr, _uri, NONCE3, _addr, 0);
+    //     assertEq(nft, 3);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE3, drop.hard() - 1));
 
-        // test for hard = 5
-        nft = drop.mint(_addr, _uri, NONCE5, _addr, 0);
-        assertEq(nft, 5);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE5, drop.hard() - 1));
+    //     // test for hard = 4
+    //     nft = drop.mint(_addr, _uri, NONCE4, _addr, 0);
+    //     assertEq(nft, 4);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE4, drop.hard() - 1));
 
-        // test for hard = 6
-        nft = drop.mint(_addr, _uri, NONCE6, _addr, 0);
-        assertEq(nft, 6);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE6, drop.hard() - 1));
+    //     // test for hard = 5
+    //     nft = drop.mint(_addr, _uri, NONCE5, _addr, 0);
+    //     assertEq(nft, 5);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE5, drop.hard() - 1));
 
-        // test for hard = 7
-        nft = drop.mint(_addr, _uri, NONCE7, _addr, 0);
-        assertEq(nft, 7);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE7, drop.hard() - 1));
+    //     // test for hard = 6
+    //     nft = drop.mint(_addr, _uri, NONCE6, _addr, 0);
+    //     assertEq(nft, 6);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE6, drop.hard() - 1));
 
-        // test for hard = 8
-        nft = drop.mint(_addr, _uri, NONCE8, _addr, 0);
-        assertEq(nft, 8);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE8, drop.hard() - 1));
+    //     // test for hard = 7
+    //     nft = drop.mint(_addr, _uri, NONCE7, _addr, 0);
+    //     assertEq(nft, 7);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE7, drop.hard() - 1));
 
-        // test for hard = 9
-        nft = drop.mint(_addr, _uri, NONCE9, _addr, 0);
-        assertEq(nft, 9);
-        assertEq(nft, uint(drop.hard()) - 1);
-        assertTrue(drop.work(nft, NONCE9, drop.hard() - 1));
-    }
+    //     // test for hard = 8
+    //     nft = drop.mint(_addr, _uri, NONCE8, _addr, 0);
+    //     assertEq(nft, 8);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE8, drop.hard() - 1));
+
+    //     // test for hard = 9
+    //     nft = drop.mint(_addr, _uri, NONCE9, _addr, 0);
+    //     assertEq(nft, 9);
+    //     assertEq(nft, uint(drop.hard()) - 1);
+    //     assertTrue(drop.work(nft, NONCE9, drop.hard() - 1));
+    // }
 
     function testFailWork() public {
         assertEq(uint(drop.hard()), 0);

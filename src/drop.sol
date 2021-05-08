@@ -254,7 +254,7 @@ contract HDDrop is
         nft = _ids++;
         require(work(nft, nonce, hard), "hd-drop-failed-work");
         // TODO: remove or add, depends what you want to do
-        // hard = hard + 1;
+        hard = hard + 1;
 
         gal = (gal != address(0)) ? gal : guy;
 
@@ -387,6 +387,20 @@ contract HDDrop is
     //     );
     //     bytes32 target = _firstn(
     //         bytes32(uint256(address(0xa1111ac011d00888DD91751A4b98769862213cf5)) << 96),
+    //         difficulty
+    //     );
+    //     return (candidate == target);
+    // }
+
+    // function tWork(
+    //     uint256 id, uint256 nonce, uint8 difficulty
+    // ) public view returns (bool) {
+    //     bytes32 candidate = _firstn(
+    //         keccak256(abi.encodePacked(address(0xBaDA550008541b3a545908387CC7Af56F2694bAA), id, nonce)),
+    //         difficulty
+    //     );
+    //     bytes32 target = _firstn(
+    //         bytes32(uint256(address(0xBaDA550008541b3a545908387CC7Af56F2694bAA)) << 96),
     //         difficulty
     //     );
     //     return (candidate == target);
